@@ -1,0 +1,89 @@
+<html>
+<head>
+    <script crossorigin="anonymous" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <style>
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+</head>
+<body>
+<div class="chat"></div>
+<input type="hidden" id="my-id" value="{{ user_id }}" />
+<div class="conversation">
+<div class="conversation-container" id="conversation-container">
+    <input type="hidden" id="last_seen_id" value="{{ last_seen_id }}" />
+{% for message in messages%}
+    <div class="message {% if message.sender_name == user_id %}sent{% else %}received{% endif %}">
+        <div>
+            {% if message.sender_name != user_id %}<div class="sendername">{{ message.sender_name }}</div>{% endif %}
+            {{ message.content }}
+            <span class="metadata"><span class="time">{{ message.server_timestamp.strftime('%H:%M') }}</span></span>
+        </div>
+    </div>
+{% endfor %}
+</div>
+</div>
+<form class="conversation-compose" id="createMessage" method="POST" action="{{ url_for('api/v1/_message_endpoint') }}">
+    <input class="input-msg" name="content" id="msg_content" placeholder="Type a message" autocomplete="off" autofocus></input>
+    <button class="send">
+    <div class="circle">
+        <i class="zmdi zmdi-mail-send"></i>
+    </div>
+    </button>
+</form>
+
+<script>
+$(document).ready(function() {
+    $('form').on('submit', function(e){
+        f = $("#createMessage");
+        e.preventDefault();  // no form submission
+        $.ajax({
+                url : "{{ url_for('api/v1/_message_endpoint') }}",
+                type: "POST",
+                processData: false,
+                data: JSON.stringify({"content": $('#msg_content').val()}),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data);
+                    $('#msg_content').val('');  // clear the input field
+                    update_messages(has_send=true);  // make sure the message shows up
+                },
+                error: function (jXHR, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+        });
+        return true;
+    })}
+);
+
+function update_messages(has_send=false) {
+    $.getJSON("{{ url_for('api/v1/_message_endpoint') }}?last_seen_id=" + $("#last_seen_id").val(), function( data ) {
+            var user_id = $('#my-id').val();
+            var div = $('#conversation-container');
+            var scroll_at_bottom = div.prop('scrollHeight') - 1 - div.scrollTop() - div.height() < 0;
+            for (var i = 0; i < data.length; i++) {
+                console.log(data[i]);
+                var last_seen_id = Math.max($("#last_seen_id").val(), data[i]["id"]);
+                $("#last_seen_id").val(last_seen_id);
+                var sent_received = user_id == data[i]['sender_name'] ? 'sent' : 'received';
+                var appendstr = "<div class='message " + sent_received +"'>";
+                if (user_id != data[i]['sender_name']) {
+                    appendstr += "<div class='sendername'>" + data[i]['sender_name'] + "</div>"
+                }
+                $("#conversation-container" ).append(appendstr + data[i]["content"] + "<div></div></div>" );
+            }
+            if (scroll_at_bottom || has_send) {
+                $('#conversation-container').scrollTop($('#conversation-container')[0].scrollHeight);
+            }
+        });
+}
+
+var intervalID = setInterval(update_messages, 500);
+
+$('#conversation-container').scrollTop($('#conversation-container')[0].scrollHeight);
+</script>
+</div>
+</body>
+</html>
