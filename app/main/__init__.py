@@ -1,5 +1,7 @@
+# Third party modules
 from flask import Blueprint
 
-main = Blueprint("main", __name__)
-
+# Local modules
 from . import routes
+
+main = Blueprint("main", __name__)

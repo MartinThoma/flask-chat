@@ -1,10 +1,10 @@
-# Core Library
+# Core Library modules
 import uuid
 
-# Third party
-from flask import session, render_template
+# Third party modules
+from flask import render_template, session
 
-# First party
+# First party modules
 from app.main import main
 from app.models import Message, db
 

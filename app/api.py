@@ -1,8 +1,8 @@
-# Third party
+# Third party modules
 from flask import jsonify, request, session
-from flask_restplus import Resource, Namespace, fields
+from flask_restplus import Namespace, Resource, fields
 
-# First party
+# First party modules
 from app.models import Message, db
 
 api_v1 = Namespace(name="api/v1/")

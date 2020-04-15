@@ -1,7 +1,7 @@
-# Core Library
+# Core Library modules
 import datetime
 
-# Third party
+# Third party modules
 from dataclasses import dataclass
 from flask_sqlalchemy import SQLAlchemy
 

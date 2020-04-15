@@ -1,13 +1,13 @@
 """empty message
 
 Revision ID: dbf86f8db800
-Revises: 
+Revises:
 Create Date: 2019-12-19 20:22:34.761029
 
 """
-from alembic import op
+# Third party modules
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "dbf86f8db800"
